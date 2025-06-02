@@ -1,5 +1,6 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
+import appRoute from "./api";
 
 const app: Application = express();
 
@@ -7,11 +8,7 @@ const app: Application = express();
 app.use(express.json());
 
 // routes
-app.get("/api", (req, res) => {
-  res.json({
-    message: "Welcome to the API",
-  });
-});
+app.get("/api", appRoute);
 
 // global error handler
 app.use(
