@@ -1,15 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
+import bcryptjs from "bcryptjs";
+import { Users } from "./users.model";
 
 export const registerUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  // validation
+  // input validation
   const { name, phoneNumber, password, role } = req.body;
   if (
-    !name?.trim() ||
+    !name.firstName?.trim() ||
+    !name.lastName?.trim() ||
     !phoneNumber?.trim() ||
     !password?.trim() ||
     !role?.trim()
@@ -18,10 +21,39 @@ export const registerUser = async (
     return next(error);
   }
 
-  // process
+  // does the user already exist?
+  const userExists = await Users.findOne({
+    phoneNumber: phoneNumber.trim(),
+  });
+  if (userExists) {
+    const error = createHttpError(409, "User already exists");
+    return next(error);
+  }
+
+  // hash the password
+  const salt = await bcryptjs.genSalt(10);
+  const hashedPassword = await bcryptjs.hash(password, salt);
+
+  // create a new user
+  const newUser = new Users({
+    name,
+    phoneNumber,
+    password: hashedPassword,
+    role,
+  });
+  await newUser.save();
 
   // response
-  res.json({ name, phoneNumber, password, role });
+  res.json({
+    statusCode: 201,
+    message: "User registered successfully",
+    data: {
+      id: newUser._id,
+      name: newUser.name,
+      phoneNumber: newUser.phoneNumber,
+      role: newUser.role,
+    },
+  });
 };
 
 export const loginUser = async (
