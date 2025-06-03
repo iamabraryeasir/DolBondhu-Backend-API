@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import createHttpError from "http-errors";
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcrypt";
 import { Users } from "./users.model";
 
 export const registerUser = async (
@@ -31,8 +31,8 @@ export const registerUser = async (
   }
 
   // hash the password
-  const salt = await bcryptjs.genSalt(10);
-  const hashedPassword = await bcryptjs.hash(password, salt);
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   // create a new user
   const newUser = new Users({
