@@ -1,14 +1,18 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import globalErrorHandler from "./middlewares/globalErrorHandler";
 import appRoute from "./api";
+import morgan from "morgan";
 
 const app: Application = express();
 
 // middlewares
 app.use(express.json());
 
+// morgan for logging
+app.use(morgan("dev"));
+
 // routes
-app.get("/api", appRoute);
+app.use("/api", appRoute);
 
 // global error handler
 app.use(
